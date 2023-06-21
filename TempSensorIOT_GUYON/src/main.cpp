@@ -7,6 +7,9 @@ const char* ssid = "Clement";
 const char* password = "ClementG69";
 const char* serverName = "http://172.20.10.3:3000/";
 
+HTTPClient http;
+WiFiClient client;
+
 void sendTemperature(float temperature);
 void sendTemperature(float temperature) {
   WiFi.mode(WIFI_STA);
@@ -21,9 +24,6 @@ void sendTemperature(float temperature) {
     Serial.print("Connected to ");
     Serial.println(ssid);
   }
-
-  HTTPClient http;
-  WiFiClient client;
 
   String endpoint = "capteurs/64904b85fd0ea8b8ee054e35";
   String url = String(serverName);
@@ -54,6 +54,18 @@ void sendTemperature(float temperature) {
   WiFi.mode(WIFI_OFF);
 }
 
+void connectToWiFi() {
+  Serial.print("Connectiog to ");
+ 
+  WiFi.begin(ssid, password);
+  while (WiFi.status() != WL_CONNECTED) {
+    Serial.print(".");
+    delay(500);
+  }
+  Serial.print("Connected.");
+  
+}
+
 void setup() {
   Serial.begin(9600);
 }
@@ -61,7 +73,6 @@ void setup() {
 void loop() {
   float temp = readTemp2();
   sendTemperature(temp);
-  
   esp_sleep_enable_timer_wakeup(5000000);
   esp_light_sleep_start();
 }
