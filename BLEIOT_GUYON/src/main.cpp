@@ -18,12 +18,15 @@ uint8_t value = 0;
 class MyServerCallbacks: public BLEServerCallbacks {
     void onConnect(BLEServer* pServer) {
       deviceConnected = true;
+      Serial.println("Nouvel appareil connecté !");
     };
 
     void onDisconnect(BLEServer* pServer) {
       deviceConnected = false;
+      Serial.println("Appareil déconnecté.");
     }
 };
+
 
 void setup() {
   Serial.begin(9600);
