@@ -17,7 +17,8 @@ const SensorData = mongoose.model(
     temp_SOIL: String,
     conduct_SOIL: String,
     water_SOIL: String,
-    timestamp: Number,
+    date: Date,
+    timestamp: Number
   })
 );
 
@@ -48,6 +49,7 @@ const fetchData = async () => {
             obj.json.result.uplink_message.decoded_payload.conduct_SOIL,
           water_SOIL: obj.json.result.uplink_message.decoded_payload.water_SOIL,
           timestamp: new Date(obj.json.result.received_at).getTime(),
+          date: new Date(obj.json.result.received_at), // Change this line
         });
 
         await sensorData.save();
@@ -74,9 +76,18 @@ mongoose
     app.get("/sensors", async (req, res) => {
       try {
         let filter = {};
-        if (req.query.timestamp) {
-          filter.timestamp = Number(req.query.timestamp);
-        }
+        if (req.query.date) {
+          let [day, month, year] = req.query.date.split('/');
+          let date = new Date(year, month - 1, day);
+          
+          let startOfDay = new Date(date);
+          startOfDay.setHours(0, 0, 0, 0);
+
+          let endOfDay = new Date(date);
+          endOfDay.setHours(23, 59, 59, 999);
+
+          filter.timestamp = { $gte: startOfDay, $lte: endOfDay };
+      }
 
         const sensorData = await SensorData.find(filter);
         res.json(sensorData);
