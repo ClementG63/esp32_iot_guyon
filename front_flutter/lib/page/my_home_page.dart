@@ -27,63 +27,7 @@ class _MyHomePageState extends State<MyHomePage> {
                 ..sort((a, b) => b.timestamp.compareTo(a.timestamp));
 
               return SingleChildScrollView(
-                child: DataTable(
-                  columns: const [
-                    DataColumn(
-                      label: Expanded(
-                        child: Text(
-                          'ID',
-                          style: TextStyle(fontStyle: FontStyle.italic),
-                        ),
-                      ),
-                    ),
-                    DataColumn(
-                      label: Expanded(
-                        child: Text(
-                          'temp_SOIL',
-                          style: TextStyle(fontStyle: FontStyle.italic),
-                        ),
-                      ),
-                    ),
-                    DataColumn(
-                      label: Expanded(
-                        child: Text(
-                          'conduct_SOIL',
-                          style: TextStyle(fontStyle: FontStyle.italic),
-                        ),
-                      ),
-                    ),
-                    DataColumn(
-                      label: Expanded(
-                        child: Text(
-                          'water_SOIL',
-                          style: TextStyle(fontStyle: FontStyle.italic),
-                        ),
-                      ),
-                    ),
-                    DataColumn(
-                      label: Expanded(
-                        child: Text(
-                          'date',
-                          style: TextStyle(fontStyle: FontStyle.italic),
-                        ),
-                      ),
-                    ),
-                  ],
-                  rows: [
-                    ...mappedList.map((e) {
-                      return DataRow(
-                        cells: [
-                          DataCell(Text(e.id)),
-                          DataCell(Text(e.tempSoil.toString())),
-                          DataCell(Text(e.conductSoil.toString())),
-                          DataCell(Text(e.waterSoil.toString())),
-                          DataCell(Text(e.date)),
-                        ],
-                      );
-                    })
-                  ],
-                ),
+                child: _buildTable(mappedList),
               );
             }
             if (snapshot.hasError) {
@@ -98,6 +42,66 @@ class _MyHomePageState extends State<MyHomePage> {
           },
         ),
       ),
+    );
+  }
+
+  DataTable _buildTable(List<SoilData> mappedList) {
+    return DataTable(
+      columns: const [
+        DataColumn(
+          label: Expanded(
+            child: Text(
+              'ID',
+              style: TextStyle(fontStyle: FontStyle.italic),
+            ),
+          ),
+        ),
+        DataColumn(
+          label: Expanded(
+            child: Text(
+              'temp_SOIL',
+              style: TextStyle(fontStyle: FontStyle.italic),
+            ),
+          ),
+        ),
+        DataColumn(
+          label: Expanded(
+            child: Text(
+              'conduct_SOIL',
+              style: TextStyle(fontStyle: FontStyle.italic),
+            ),
+          ),
+        ),
+        DataColumn(
+          label: Expanded(
+            child: Text(
+              'water_SOIL',
+              style: TextStyle(fontStyle: FontStyle.italic),
+            ),
+          ),
+        ),
+        DataColumn(
+          label: Expanded(
+            child: Text(
+              'date',
+              style: TextStyle(fontStyle: FontStyle.italic),
+            ),
+          ),
+        ),
+      ],
+      rows: [
+        ...mappedList.map((e) {
+          return DataRow(
+            cells: [
+              DataCell(Text(e.id)),
+              DataCell(Text(e.tempSoil.toString())),
+              DataCell(Text(e.conductSoil.toString())),
+              DataCell(Text(e.waterSoil.toString())),
+              DataCell(Text(e.date)),
+            ],
+          );
+        })
+      ],
     );
   }
 }
