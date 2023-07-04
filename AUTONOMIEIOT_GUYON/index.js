@@ -7,11 +7,22 @@ import fetchData from "./fetchData.js";
 
 const app = express();
 
+// Création du modèle Mongoose pour la configuration
+const Configuration = mongoose.model(
+  "Configuration",
+  new mongoose.Schema({
+    type: String,
+  })
+);
+
 // Définition du modèle de données pour le capteur
-const Sensor = mongoose.model('Sensor', new mongoose.Schema({
-  nom: String,
-  temperature: Number
-}));
+export const Sensor = mongoose.model(
+  "Sensor",
+  new mongoose.Schema({
+    nom: String,
+    temperature: Number,
+  })
+);
 
 export const SensorData = mongoose.model(
   "SensorData",
@@ -26,6 +37,7 @@ export const SensorData = mongoose.model(
 );
 
 app.use(morgan("dev"));
+app.use(express.json());
 app.use(cors());
 
 mongoose
@@ -38,6 +50,27 @@ mongoose
 
     app.listen(3000, () => {
       console.log("API en écoute sur http://localhost:3000");
+    });
+
+    // Endpoint pour sauvegarder une configuration
+    app.post("/configuration", async (req, res) => {
+      try {
+        const configuration = new Configuration(req.body);
+        await configuration.save();
+        res.status(201).json(configuration);
+      } catch (err) {
+        res.status(500).json({ message: err.message });
+      }
+    });
+
+    // Endpoint pour récupérer la configuration
+    app.get("/config", async (req, res) => {
+      try {
+        const configuration = await Config.find();
+        res.json(configuration);
+      } catch (err) {
+        res.status(500).json({ message: err.message });
+      }
     });
 
     app.get("/ttn-sensors", async (req, res) => {
@@ -63,17 +96,15 @@ mongoose
       }
     });
 
-    app.get("/esp32", async (req, res) => {
+    app.get("/sensors", async (req, res) => {
       try {
         const sensors = await Sensor.find();
         res.json(sensors);
       } catch (err) {
-        res
-          .status(500)
-          .json({
-            message:
-              "Une erreur est survenue lors de la récupération des capteurs",
-          });
+        res.status(500).json({
+          message:
+            "Une erreur est survenue lors de la récupération des capteurs",
+        });
       }
     });
 
@@ -88,12 +119,9 @@ mongoose
         }
         res.json(sensor);
       } catch (err) {
-        res
-          .status(500)
-          .json({
-            message:
-              "Une erreur est survenue lors de la récupération du capteur",
-          });
+        res.status(500).json({
+          message: "Une erreur est survenue lors de la récupération du capteur",
+        });
       }
     });
 
@@ -124,11 +152,9 @@ mongoose
           message: "Les données du capteur ont été mises à jour avec succès",
         });
       } catch (err) {
-        res
-          .status(500)
-          .json({
-            message: `Une erreur est survenue lors de la mise à jour du capteur ${err}`,
-          });
+        res.status(500).json({
+          message: `Une erreur est survenue lors de la mise à jour du capteur ${err}`,
+        });
       }
     });
 
