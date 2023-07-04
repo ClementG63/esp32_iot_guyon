@@ -64,10 +64,10 @@ mongoose
     });
 
     // Endpoint pour récupérer la configuration
-    app.get("/config", async (req, res) => {
+    app.get("/configuration", async (_, res) => {
       try {
-        const configuration = await Config.find();
-        res.json(configuration);
+        const configuration = await Configuration.find();
+        res.json(configuration[0]);
       } catch (err) {
         res.status(500).json({ message: err.message });
       }
@@ -133,7 +133,6 @@ mongoose
         return res.status(400).json({ message: "La température est requise" });
       }
 
-      // Recherche, mise à jour et sauvegarde du capteur dans la base de données
       try {
         let sensor = await Sensor.findOne({ nom: id });
         if (!sensor) {
