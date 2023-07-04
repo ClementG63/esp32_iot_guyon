@@ -7,6 +7,12 @@ import fetchData from "./fetchData.js";
 
 const app = express();
 
+// Définition du modèle de données pour le capteur
+const Sensor = mongoose.model('Sensor', new mongoose.Schema({
+  nom: String,
+  temperature: Number
+}));
+
 export const SensorData = mongoose.model(
   "SensorData",
   new mongoose.Schema({
@@ -15,7 +21,7 @@ export const SensorData = mongoose.model(
     conduct_SOIL: String,
     water_SOIL: String,
     date: Date,
-    timestamp: Number
+    timestamp: Number,
   })
 );
 
@@ -34,13 +40,13 @@ mongoose
       console.log("API en écoute sur http://localhost:3000");
     });
 
-    app.get("/sensors", async (req, res) => {
+    app.get("/ttn-sensors", async (req, res) => {
       try {
         let filter = {};
         if (req.query.date) {
-          let [day, month, year] = req.query.date.split('/');
+          let [day, month, year] = req.query.date.split("/");
           let date = new Date(year, month - 1, day);
-          
+
           let startOfDay = new Date(date);
           startOfDay.setHours(0, 0, 0, 0);
 
@@ -48,12 +54,81 @@ mongoose
           endOfDay.setHours(23, 59, 59, 999);
 
           filter.timestamp = { $gte: startOfDay, $lte: endOfDay };
-      }
+        }
 
         const sensorData = await SensorData.find(filter);
         res.json(sensorData);
       } catch (err) {
         res.status(500).json({ message: err.message });
+      }
+    });
+
+    app.get("/esp32", async (req, res) => {
+      try {
+        const sensors = await Sensor.find();
+        res.json(sensors);
+      } catch (err) {
+        res
+          .status(500)
+          .json({
+            message:
+              "Une erreur est survenue lors de la récupération des capteurs",
+          });
+      }
+    });
+
+    app.get("/sensors/:id", async (req, res) => {
+      const { id } = req.params;
+      try {
+        const sensor = await Sensor.findById(id);
+        if (!sensor) {
+          return res
+            .status(404)
+            .json({ message: "Aucun capteur trouvé avec cet ID" });
+        }
+        res.json(sensor);
+      } catch (err) {
+        res
+          .status(500)
+          .json({
+            message:
+              "Une erreur est survenue lors de la récupération du capteur",
+          });
+      }
+    });
+
+    app.put("/sensors/:id", async (req, res) => {
+      const { id } = req.params;
+      const { temperature } = req.body;
+
+      if (!temperature) {
+        return res.status(400).json({ message: "La température est requise" });
+      }
+
+      // Recherche, mise à jour et sauvegarde du capteur dans la base de données
+      try {
+        let sensor = await Sensor.findOne({ nom: id });
+        if (!sensor) {
+          sensor = new Sensor({
+            nom: id,
+            temperature: temperature,
+          });
+          await sensor.save();
+          return res.json({
+            message: "Les données du capteur ont été créées avec succès",
+          });
+        }
+        sensor.temperature = temperature;
+        await sensor.save();
+        res.json({
+          message: "Les données du capteur ont été mises à jour avec succès",
+        });
+      } catch (err) {
+        res
+          .status(500)
+          .json({
+            message: `Une erreur est survenue lors de la mise à jour du capteur ${err}`,
+          });
       }
     });
 
