@@ -5,6 +5,7 @@
 #include <ArduinoJson.h>
 #include <ArduinoBLE.h>
 #include <EEPROM.h>
+#include <PubSubClient.h>
 
 #define EEPROM_SIZE 512
 #define CONFIG_ADDRESS 0
